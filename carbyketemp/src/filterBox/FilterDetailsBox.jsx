@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import wrongIcon from '../assets/wrongIcon.jpg'
 import { useParams } from 'react-router-dom';
-import {Link } from "react-router-dom"
 
 const FilterDetailsBox = ({ theme }) => {
-  const [state, setState] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [details, setDetails] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
   const { id } = useParams();
-  const [details, setDetails] = useState(null); // Initialize as null to handle loading state
 
   useEffect(() => {
-    setState(theme === "dark");
+    setIsDarkMode(theme === "dark");
   }, [theme]);
 
   useEffect(() => {
@@ -24,14 +25,16 @@ const FilterDetailsBox = ({ theme }) => {
     fetchData();
   }, [id]);
 
+  const openDialog = () => setIsOpen(true);
+  const closeDialog = () => setIsOpen(false);
+
   if (!details) {
-    return <div className="text-center text-xl">Loading...</div>; // Loading state
+    return <div className="text-center text-xl">Loading...</div>;
   }
 
   return (
-    <div className={`p-6 max-w-7xl mx-auto ${state ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'} rounded-lg shadow-md`}>
+    <div className={`p-6 max-w-7xl mx-auto ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'} rounded-lg shadow-md`}>
       <div className="flex flex-col md:flex-row gap-12">
-        {/* Image Section */}
         <div className="flex-shrink-0">
           <img 
             src={details.photo} 
@@ -40,74 +43,53 @@ const FilterDetailsBox = ({ theme }) => {
           />
         </div>
 
-        {/* Details Section */}
         <div className="flex-1 p-4 space-y-6 bg-white shadow-lg rounded-lg">
           <h2 className="text-3xl font-bold border-b-2 pb-2">{details.name}</h2>
 
           <div className="grid grid-cols-2 gap-6">
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Brand</p>
-              <p className="text-lg font-medium">{details.brand}</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Model</p>
-              <p className="text-lg font-medium">{details.model}</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Price</p>
-              <p className="text-lg font-medium">${details.price}</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Seller</p>
-              <p className="text-lg font-medium">{details.seller}</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Performance</p>
-              <p className="text-lg font-medium">{details.performance}</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Owner</p>
-              <p className="text-lg font-medium">{details.owner}</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Mileage</p>
-              <p className="text-lg font-medium">{details.miLeg} km</p>
-            </div>
-            <div>
-              <p className="text-xl font-semibold text-gray-600">Servicing</p>
-              <p className="text-lg font-medium">{details.serviving}</p>
-            </div>
+            <DetailRow label="Brand" value={details.brand} />
+            <DetailRow label="Model" value={details.model} />
+            <DetailRow label="Price" value={`$${details.price}`} />
+            <DetailRow label="Seller" value={details.seller} />
+            <DetailRow label="Performance" value={details.performance} />
+            <DetailRow label="Owner" value={details.owner} />
+            <DetailRow label="Mileage" value={`${details.miLeg} km`} />
+            <DetailRow label="Servicing" value={details.serviving} />
           </div>
-       
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
-  Launch demo modal
-</button>
 
+          <div className="flex items-center justify-center">
+            <button
+              onClick={openDialog}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Open Card
+            </button>
 
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-       
+            {isOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center" onClick={closeDialog}>
+                <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={closeDialog}
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                  >
+                    <img src={wrongIcon} height={40} width={40}/>
+                  </button>
+                  <h2 className="text-xl font-bold">Seller : {details.miLeg}</h2>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+const DetailRow = ({ label, value }) => (
+  <div>
+    <p className="text-xl font-semibold text-gray-600">{label}</p>
+    <p className="text-lg font-medium">{value}</p>
+  </div>
+);
 
 export default FilterDetailsBox;
